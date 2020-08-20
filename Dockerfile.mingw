@@ -18,15 +18,30 @@ MAINTAINER Tatsuhiro Tsujikawa
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 ENV HOST i686-w64-mingw32
 
+# Local Proxy
+ENV HTTP_PROXY http://192.168.0.101:1081/
+ENV HTTPS_PROXY http://192.168.0.101:1081/
+ENV http_proxy http://192.168.0.101:1081/ 
+ENV https_proxy http://192.168.0.101:1081/
+
 # It would be better to use nearest ubuntu archive mirror for faster
 # downloads.
-# RUN sed -ie 's/archive\.ubuntu/jp.archive.ubuntu/g' /etc/apt/sources.list
+RUN sed -ie 's/archive\.ubuntu\.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+RUN sed -ie 's/security\.ubuntu\.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
 
 RUN apt-get update && \
     apt-get install -y \
         make binutils autoconf automake autotools-dev libtool \
         pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
         autopoint libcppunit-dev libxml2-dev libgcrypt11-dev lzip
+
+# Local Cache
+# RUN curl -L -O http://192.168.0.101/temp/gmp-6.1.2.tar.lz && \
+#     curl -L -O http://192.168.0.101/temp/expat-2.2.7.tar.bz2 && \
+#     curl -L -O http://192.168.0.101/temp/sqlite-autoconf-3290000.tar.gz && \
+#     curl -L -O http://192.168.0.101/temp/zlib-1.2.11.tar.gz && \
+#     curl -L -O http://192.168.0.101/temp/c-ares-1.15.0.tar.gz && \
+#     curl -L -O http://192.168.0.101/temp/libssh2-1.9.0.tar.gz
 
 RUN curl -L -O https://gmplib.org/download/gmp/gmp-6.1.2.tar.lz && \
     curl -L -O https://github.com/libexpat/libexpat/releases/download/R_2_2_7/expat-2.2.7.tar.bz2 && \
@@ -106,6 +121,6 @@ RUN tar xf libssh2-1.9.0.tar.gz && \
         LIBS="-lws2_32" && \
     make install
 ADD https://api.github.com/repos/aria2/aria2/git/refs/heads/master version.json
-RUN git clone https://github.com/aria2/aria2 && \
+RUN git clone https://github.com/chitao1234/aria2-2048-threads && \
     cd aria2 && autoreconf -i && ./mingw-config && make && \
     $HOST-strip src/aria2c.exe
