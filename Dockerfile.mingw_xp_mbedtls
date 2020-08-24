@@ -1,0 +1,147 @@
+# Dockerfile to build aria2 Windows binary using ubuntu mingw-w64
+# cross compiler chain.
+#
+# $ sudo docker build -t aria2-mingw - < Dockerfile.mingw
+#
+# After successful build, windows binary is located at
+# /aria2-2048-threads/src/aria2c.exe.  You can copy the binary using following
+# commands:
+#
+# $ id=$(sudo docker create aria2-mingw)
+# $ sudo docker cp $id:/aria2-2038-threads/src/aria2c.exe <dest>
+# $ sudo docker rm -v $id
+
+FROM ubuntu:19.04
+
+MAINTAINER Tatsuhiro Tsujikawa
+
+# Change HOST to x86_64-w64-mingw32 to build 64-bit binary
+ENV HOST i686-w64-mingw32
+
+# Local Proxy
+ENV HTTP_PROXY http://192.168.0.101:1081/
+ENV HTTPS_PROXY http://192.168.0.101:1081/
+ENV http_proxy http://192.168.0.101:1081/ 
+ENV https_proxy http://192.168.0.101:1081/
+
+# It would be better to use nearest ubuntu archive mirror for faster
+# downloads.
+RUN sed -ie 's/archive\.ubuntu\.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+RUN sed -ie 's/security\.ubuntu\.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+
+RUN apt-get update && \
+    apt-get install -y \
+        make binutils autoconf automake autotools-dev libtool \
+        pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
+        autopoint libcppunit-dev libxml2-dev libgcrypt11-dev lzip python python3
+
+# Local Cache
+RUN curl -L -O http://192.168.0.101/temp/gmp-6.1.2.tar.lz && \
+    curl -L -O http://192.168.0.101/temp/expat-2.2.7.tar.bz2 && \
+    curl -L -O http://192.168.0.101/temp/sqlite-autoconf-3290000.tar.gz && \
+    curl -L -O http://192.168.0.101/temp/zlib-1.2.11.tar.gz && \
+    curl -L -O http://192.168.0.101/temp/c-ares-1.15.0.tar.gz && \
+    curl -L -O http://192.168.0.101/temp/libssh2-1.9.0.tar.gz && \
+    curl -L -O http://192.168.0.101/temp/mbedtls-2.23.0.tar.gz
+
+# RUN curl -L -O https://gmplib.org/download/gmp/gmp-6.1.2.tar.lz && \
+#     curl -L -O https://github.com/libexpat/libexpat/releases/download/R_2_2_7/expat-2.2.7.tar.bz2 && \
+#     curl -L -O https://www.sqlite.org/2019/sqlite-autoconf-3290000.tar.gz && \
+#     curl -L -O http://zlib.net/zlib-1.2.11.tar.gz && \
+#     curl -L -O https://c-ares.haxx.se/download/c-ares-1.15.0.tar.gz && \
+#     curl -L -O https://www.libssh2.org/download/libssh2-1.9.0.tar.gz && \
+#     curl -L -O https://github.com/ARMmbed/mbedtls/archive/v2.23.0.tar.gz
+
+RUN tar xf gmp-6.1.2.tar.lz && \
+    cd gmp-6.1.2 && \
+    ./configure \
+        --disable-shared \
+        --enable-static \
+        --prefix=/usr/local/$HOST \
+        --host=$HOST \
+        --disable-cxx \
+        --enable-fat \
+        CPPFLAGS="-mtune=generic -O2 -g0" && \
+    make install
+
+RUN tar xf expat-2.2.7.tar.bz2 && \
+    cd expat-2.2.7 && \
+    ./configure \
+        --disable-shared \
+        --enable-static \
+        --prefix=/usr/local/$HOST \
+        --host=$HOST \
+        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` && \
+    make install
+
+RUN tar xf sqlite-autoconf-3290000.tar.gz && \
+    cd sqlite-autoconf-3290000 && \
+    ./configure \
+        --disable-shared \
+        --enable-static \
+        --prefix=/usr/local/$HOST \
+        --host=$HOST \
+        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
+        CPPFLAGS=$CPPFLAGS" -D_WIN32_WINNT=0x0501" && \
+    make install
+
+RUN tar xf zlib-1.2.11.tar.gz && \
+    cd zlib-1.2.11 && \
+    CC=$HOST-gcc \
+    AR=$HOST-ar \
+    LD=$HOST-ld \
+    RANLIB=$HOST-ranlib \
+    STRIP=$HOST-strip \
+    ./configure \
+        --prefix=/usr/local/$HOST \
+        --libdir=/usr/local/$HOST/lib \
+        --includedir=/usr/local/$HOST/include \
+        --static && \
+    make install
+
+RUN tar xf c-ares-1.15.0.tar.gz && \
+    cd c-ares-1.15.0 && \
+    ./configure \
+        --disable-shared \
+        --enable-static \
+        --without-random \
+        --prefix=/usr/local/$HOST \
+        --host=$HOST \
+        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
+        LIBS="-lws2_32" \
+        CPPFLAGS=$CPPFLAGS" -D_WIN32_WINNT=0x0501" && \
+    make install
+
+RUN tar xf mbedtls-2.23.0.tar.gz && \
+    cd mbedtls-2.23.0 && \
+    sed -ie 's/#if defined(_TRUNCATE)/#if defined(_TRUNCATE) \&\& !defined(__MINGW32__)/g' library/platform.c && \
+    sed -ie 's/#if defined(_TRUNCATE)/#if defined(_TRUNCATE) \&\& !defined(__MINGW32__)/g' library/debug.c && \
+    CC=$HOST-gcc \
+    AR=$HOST-ar \
+    LD=$HOST-ld \
+    RANLIB=$HOST-ranlib \
+    STRIP=$HOST-strip \
+    make install \
+    WINDOWS_BUILD=1 \
+    CFLAGS=$CFLAGS"-O2 -static -D_WIN32_WINNT=0x0501 -U_TRUNCATE" \
+    CPPFLAGS=$CPPFLAGS" -D_WIN32_WINNT=0x0501 -U_TRUNCATE" \
+    DESTDIR=/usr/local/$HOST
+
+RUN tar xf libssh2-1.9.0.tar.gz && \
+    cd libssh2-1.9.0 && \
+    ./configure \
+        --disable-shared \
+        --enable-static \
+        --prefix=/usr/local/$HOST \
+        --host=$HOST \
+        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
+        --with-crypto=mbedtls \
+        LIBS="-lws2_32" \
+        CFLAGS=$CFLAGS" -D_WIN32_WINNT=0x0501" \
+        CPPFLAGS=$CPPFLAGS" -D_WIN32_WINNT=0x0501" && \
+    make install
+
+ADD https://api.github.com/repos/aria2/aria2/git/refs/heads/master version.json
+RUN git clone https://github.com/chitao1234/aria2-2048-threads && \
+    cd aria2-2048-threads && autoreconf -i && ./mingw-config && make && \
+    $HOST-strip src/aria2c.exe
