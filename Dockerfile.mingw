@@ -16,7 +16,7 @@ FROM ubuntu:22.04
 MAINTAINER Tatsuhiro Tsujikawa
 
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
-ENV HOST i686-w64-mingw32
+ENV HOST x86_64-w64-mingw32
 
 # It would be better to use nearest ubuntu archive mirror for faster
 # downloads.
@@ -101,7 +101,7 @@ RUN tar xf c-ares-1.18.1.tar.gz && \
         --prefix=/usr/local/$HOST \
         --host=$HOST \
         --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
-        LIBS="-lws2_32" && \
+        LIBS="-lws2_32 -liphlpapi" && \
     make install
 
 RUN tar xf libssh2-1.10.0.tar.gz && \
