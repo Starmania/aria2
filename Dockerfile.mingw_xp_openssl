@@ -43,7 +43,9 @@ RUN curl -L -O https://gmplib.org/download/gmp/gmp-6.2.1.tar.lz && \
     curl -L -O http://zlib.net/zlib-1.2.12.tar.gz && \
     curl -L -O https://c-ares.haxx.se/download/c-ares-1.18.1.tar.gz && \
     curl -L -O https://www.libssh2.org/download/libssh2-1.10.0.tar.gz && \
-	curl -L -O https://www.openssl.org/source/openssl-1.1.1p.tar.gz
+    curl -L -O https://www.openssl.org/source/openssl-1.1.1p.tar.gz
+
+ENV MAKEFLAGS -j4
 
 RUN tar xf gmp-6.2.1.tar.lz && \
     cd gmp-6.2.1 && \
