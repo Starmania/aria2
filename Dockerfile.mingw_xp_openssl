@@ -130,7 +130,6 @@ RUN tar xf openssl-1.1.1p.tar.gz && \
 
 RUN tar xf libssh2-1.10.0.tar.gz && \
     cd libssh2-1.10.0 && \
-    patch -p1 < ../ba149e804ef653cc05ed9803dfc94519ce9328f7.patch && \
     ./configure \
         --disable-shared \
         --enable-static \
