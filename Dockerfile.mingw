@@ -116,7 +116,7 @@ RUN tar xf libssh2-1.9.0.tar.gz && \
         --with-wincng \
         LIBS="-lws2_32" && \
     make install
-ADD https://api.github.com/repos/aria2/aria2/git/refs/heads/master version.json
+ADD https://api.github.com/repos/chitao1234/aria2-2048-threads/git/refs/heads/master version.json
 RUN git clone https://github.com/chitao1234/aria2-2048-threads && \
     cd aria2-2048-threads && autoreconf -i && ./mingw-config && make && \
     $HOST-strip src/aria2c.exe
