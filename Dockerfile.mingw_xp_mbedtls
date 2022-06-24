@@ -127,8 +127,8 @@ RUN tar xf libssh2-1.10.0.tar.gz && \
         --host=$HOST \
         --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
         --with-crypto=mbedtls \
-        LIBS="-lws2_32" \
-        CPPFLAGS=$CPPFLAGS" -D_WIN32_WINNT=0x0501" && \
+        LIBS="-lws2_32 -lcrypt32" \
+        CFLAGS=$CFLAGS" -D_WIN32_WINNT=0x0501" && \
     make install
 ADD https://api.github.com/repos/chitao1234/aria2-2048-threads/git/refs/heads/master version.json
 RUN git clone https://github.com/chitao1234/aria2-2048-threads && \
