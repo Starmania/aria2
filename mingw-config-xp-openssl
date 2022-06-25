@@ -76,7 +76,6 @@ test -z "$PREFIX" && PREFIX=/usr/local/$HOST
     --without-libgcrypt \
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
-    --with-ca-bundle="/etc/ssl/certs/ca-bundle.crt" \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
