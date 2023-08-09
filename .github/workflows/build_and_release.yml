@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Set current date as env variable
         run: echo "NOW=$(date --utc)" >> $GITHUB_ENV
-      - uses: dev-drprasad/delete-tag-and-release@v0.1.2
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.1
         with:
           delete_release: true
           tag_name: 1.36.0
@@ -115,7 +115,7 @@ jobs:
         with:
           name: aria2 ${{ env.ARIA2_VER }} static release
           path: /tmp/${{ env.ARCHIVE_NAME }}
-          
+
       - name: Upload Github Assets
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@master

@@ -6,6 +6,17 @@ Disclaimer
 This program comes with no warranty.
 You must use this program at your own risk.
 
+Custom build
+------------
+This is a custom build of aria2 with the following changes:
+  - By @Chitao1234:
+    - No limits on the number of connections or anything
+    - Bumped versions of deps in the Dockerfile for windows build
+    - Build Actions (only for Linux + Windows)
+
+  - By @ykxVK8yL5L:
+    - Github Actions CI (for all)
+
 Introduction
 ------------
 
@@ -421,7 +432,7 @@ multi-file mode
 
 Before download starts, a complete directory structure is created if
 needed. By default, aria2 opens at most 100 files mentioned in
-.torrent file, and directly writes to and reads from these files. 
+.torrent file, and directly writes to and reads from these files.
 The number of files to open simultaneously can be controlled by
 ``--bt-max-open-files`` option.
 

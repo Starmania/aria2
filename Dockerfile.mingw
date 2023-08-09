@@ -4,11 +4,11 @@
 # $ sudo docker build -t aria2-mingw - < Dockerfile.mingw
 #
 # After successful build, windows binary is located at
-# /aria2-2048-threads/src/aria2c.exe.  You can copy the binary using following
+# /aria2/src/aria2c.exe.  You can copy the binary using following
 # commands:
 #
 # $ id=$(sudo docker create aria2-mingw)
-# $ sudo docker cp $id:/aria2-2048-threads/src/aria2c.exe <dest>
+# $ sudo docker cp $id:/aria2/src/aria2c.exe <dest>
 # $ sudo docker rm -v $id
 
 FROM ubuntu:22.04
@@ -118,5 +118,5 @@ RUN tar xf libssh2-1.10.0.tar.gz && \
     make install
 ADD https://api.github.com/repos/Starmania/aria2/git/refs/heads/master version.json
 RUN git clone https://github.com/Starmania/aria2 && \
-    cd aria2-2048-threads && autoreconf -i && ./mingw-config && make && \
+    cd aria2 && autoreconf -i && ./mingw-config && make && \
     $HOST-strip src/aria2c.exe
