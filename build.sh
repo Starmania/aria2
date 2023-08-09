@@ -255,8 +255,9 @@ prepare_ssl() {
       echo "- libressl: ${libressl_ver}, source: ${libressl_latest_url:-cached libressl}" >>"${BUILD_INFO}"
     else
       # openssl
-      openssl_filename="$(retry wget -qO- --compression=auto https://www.openssl.org/source/ \| grep -o "'href=\"openssl-3.*tar.gz\"'" \| grep -o "'[^\"]*.tar.gz'")"
-      openssl_ver="$(echo $openssl_filename | sed -r 's/.+(3\.([0-9]+\.)+[0-9]+).*/\1/')" # Match last version
+      openssl_filenames="$(retry wget -qO- --compression=auto https://www.openssl.org/source/ \| grep -o "'href=\"openssl-3.*tar.gz\"'" \| grep -o "'[^\"]*.tar.gz'")"
+      openssl_ver="$(echo $openssl_filenames | sed -r 's/.+(3\.([0-9]+\.)+[0-9]+).*/\1/')" # Match last version
+      openssl_filename="openssl-${openssl_ver}.tar.gz"
       openssl_latest_url="https://github.com/openssl/openssl/archive/refs/tags/${openssl_filename}"
       if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
         openssl_latest_url="https://ghproxy.com/${openssl_latest_url}"
