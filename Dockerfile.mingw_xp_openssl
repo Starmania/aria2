@@ -26,15 +26,15 @@ RUN sed -ie 's/security\.ubuntu\.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.lis
 RUN apt-get update && \
     DEBIAN_FRONTEND="noninteractive" \
     apt-get install -y --no-install-recommends \
-        make binutils autoconf automake autotools-dev libtool \
-        patch ca-certificates \
-        pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-        autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip
- 
+    make binutils autoconf automake autotools-dev libtool \
+    patch ca-certificates \
+    pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
+    autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip
+
 # Local Proxy
 ENV HTTP_PROXY http://192.168.0.101:1081/
 ENV HTTPS_PROXY http://192.168.0.101:1081/
-ENV http_proxy http://192.168.0.101:1081/ 
+ENV http_proxy http://192.168.0.101:1081/
 ENV https_proxy http://192.168.0.101:1081/
 
 RUN curl -L -O https://github.com/libexpat/libexpat/releases/download/R_2_4_8/expat-2.4.8.tar.bz2 && \
@@ -49,21 +49,21 @@ ENV MAKEFLAGS -j4
 RUN tar xf expat-2.4.8.tar.bz2 && \
     cd expat-2.4.8 && \
     ./configure \
-        --disable-shared \
-        --enable-static \
-        --prefix=/usr/local/$HOST \
-        --host=$HOST \
-        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` && \
+    --disable-shared \
+    --enable-static \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST \
+    --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` && \
     make install
 
 RUN tar xf sqlite-autoconf-3380500.tar.gz && \
     cd sqlite-autoconf-3380500 && \
     ./configure \
-        --disable-shared \
-        --enable-static \
-        --prefix=/usr/local/$HOST \
-        --host=$HOST \
-        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` && \
+    --disable-shared \
+    --enable-static \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST \
+    --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` && \
     make install
 
 RUN tar xf zlib-1.2.12.tar.gz && \
@@ -74,61 +74,61 @@ RUN tar xf zlib-1.2.12.tar.gz && \
     RANLIB=$HOST-ranlib \
     STRIP=$HOST-strip \
     ./configure \
-        --prefix=/usr/local/$HOST \
-        --libdir=/usr/local/$HOST/lib \
-        --includedir=/usr/local/$HOST/include \
-        --static && \
+    --prefix=/usr/local/$HOST \
+    --libdir=/usr/local/$HOST/lib \
+    --includedir=/usr/local/$HOST/include \
+    --static && \
     make install
 
 RUN tar xf c-ares-1.17.2.tar.gz && \
     cd c-ares-1.17.2 && \
     ./configure \
-        --disable-shared \
-        --enable-static \
-        --without-random \
-        --prefix=/usr/local/$HOST \
-        --host=$HOST \
-        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
-        LIBS="-lws2_32" && \
+    --disable-shared \
+    --enable-static \
+    --without-random \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST \
+    --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
+    LIBS="-lws2_32" && \
     make install
 
 RUN tar xf openssl-1.1.1p.tar.gz && \
     cd openssl-1.1.1p && \
     case $HOST in \
     *i?86*) \
-        TARGET=mingw \
-        ;; \
+    TARGET=mingw \
+    ;; \
     *x86_64*) \
-        TARGET=mingw64 \
-        ;; \
+    TARGET=mingw64 \
+    ;; \
     *) \
-        false \
-        ;; \
+    false \
+    ;; \
     esac && \
     CROSS_COMPILE=$HOST"-" \
     CPPFLAGS=$CPPFLAGS" -D_WIN32_WINNT=0x0501" \
     ./Configure \
-        $TARGET \
-        -static \
-        no-shared \
-        enable-capieng \
-        --prefix=/usr/local/$HOST && \
+    $TARGET \
+    -static \
+    no-shared \
+    enable-capieng \
+    --prefix=/usr/local/$HOST && \
     make && \
     make install
 
 RUN tar xf libssh2-1.10.0.tar.gz && \
     cd libssh2-1.10.0 && \
     ./configure \
-        --disable-shared \
-        --enable-static \
-        --prefix=/usr/local/$HOST \
-        --host=$HOST \
-        --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
-        --with-crypto=openssl \
-        LIBS="-lws2_32 -lcrypt32" \
-        CFLAGS=$CFLAGS" -D_WIN32_WINNT=0x0501" && \
+    --disable-shared \
+    --enable-static \
+    --prefix=/usr/local/$HOST \
+    --host=$HOST \
+    --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
+    --with-crypto=openssl \
+    LIBS="-lws2_32 -lcrypt32" \
+    CFLAGS=$CFLAGS" -D_WIN32_WINNT=0x0501" && \
     make install
-ADD https://api.github.com/repos/chitao1234/aria2-2048-threads/git/refs/heads/master version.json
-RUN git clone https://github.com/chitao1234/aria2-2048-threads && \
+ADD https://api.github.com/repos/Starmania/aria2/git/refs/heads/master version.json
+RUN git clone https://github.com/Starmania/aria2 && \
     cd aria2-2048-threads && autoreconf -i && ./mingw-config-xp-openssl && make && \
     $HOST-strip src/aria2c.exe
